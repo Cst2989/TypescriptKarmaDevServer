@@ -53,32 +53,61 @@
 
 	import { Observable } from 'rxjs';
 
+
+	/*
+	 * Here we select de refresh button, and the close buttons for each recomandation
+	 */
 	let refreshButton = document.querySelector('.refresh');
 	let closeButton1 = document.querySelector('.close1');
 	let closeButton2 = document.querySelector('.close2');
 	let closeButton3 = document.querySelector('.close3');
 
 
+	/*
+	 * Here we create streams from each button click
+	 */
 	let refreshClickStream = Observable.fromEvent(refreshButton, 'click');
 	let close1Clicks = Observable.fromEvent(closeButton1, 'click');
 	let close2Clicks = Observable.fromEvent(closeButton2, 'click');
 	let close3Clicks = Observable.fromEvent(closeButton3, 'click');
 
+
+	/*
+	 * refreshOnClick - we map each click to the API link + a random number
+	 */
 	let refreshOnClick = refreshClickStream.map(ev => {
 	    let randomNumber = Math.floor(Math.random() * 500);
 	    return 'https://api.github.com/users?since=' + randomNumber;
-	})
+	});
+
+
+	//This is the starting url
 	let startRequestStream = Observable.of('https://api.github.com/users');
 
+
+	/*
+	 * responseStream -  we merge the refreshClick stream with the start stream and flatMap over it.
+	 * It will fetch a response which will be made into an Observable.
+	 * Multiple subscribes to the same stream will use the same response.
+	 *
+	*/
 	let responseStream = refreshOnClick.merge(startRequestStream).flatMap(response => {
-	    console.log("aici")
 	    return Observable.fromPromise(fetch(response).then(r => r.json()));
 	}).publishReplay(1).refCount()
 
+
+	//getRandomUser -  we return a random user from an array of users
 	function getRandomUser(listUser) {
 	    return listUser[Math.floor(Math.random() * listUser.length)]
 	}
 
+
+	/*
+	 * createSuggestionStream - from the responseStream we get a random user
+	 * Prepends the null value to the stream.
+	 * Merges with the refresh click stream with every value maped to null
+	 * Merges with the closeClickStream which uses the last responseStream
+	 */
 	function createSuggestionStream(responseStream, closeClickStream) {
 	    return responseStream.map(listUser => getRandomUser(listUser))
 	    .startWith(null)
@@ -89,6 +118,7 @@
 	    );
 	}
 
+	//Here we create the streams for each row. The second and third row filters the values before them.
 	let suggestion1Stream = createSuggestionStream(responseStream, close1Clicks);
 	let suggestion2Stream = createSuggestionStream(responseStream.filter(r => r != suggestion1Stream), close2Clicks);
 	let suggestion3Stream = createSuggestionStream(responseStream.filter(r => r != suggestion2Stream), close3Clicks);
@@ -109,6 +139,8 @@
 	    }
 	}
 
+
+	//The stream subscriptions.
 	suggestion1Stream.subscribe(user => {
 	    renderSuggestion(user, '.suggestion1');
 	});
