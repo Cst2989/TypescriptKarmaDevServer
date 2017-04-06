@@ -1,18 +1,18 @@
-import { PremierLeague } from './data/premier-league';
+import { LaLiga } from './data/la-liga';
 
-let premierLeague = new PremierLeague();
+let laLiga = new LaLiga();
 
-let HomeTeam = "Chelsea";
-let AwayTeam = "Man City";
+let HomeTeam = "Valencia";
+let AwayTeam = "Celta";
 
-let leagueHomeStrength = premierLeague.leagueAtackStrength();
-let leagueAwayStrength = premierLeague.leagueDefenseStrength();
+let leagueHomeStrength = laLiga.leagueAtackStrength();
+let leagueAwayStrength = laLiga.leagueDefenseStrength();
 
-let homeAt = premierLeague.getHomeAtack(HomeTeam);
-let homeDef = premierLeague.getHomeDefense(HomeTeam);
+let homeAt = laLiga.getHomeAtack(HomeTeam);
+let homeDef = laLiga.getHomeDefense(HomeTeam);
 
-let awayAt = premierLeague.getAwayAtack(AwayTeam);
-let awayDef = premierLeague.getAwayDefense(AwayTeam);
+let awayAt = laLiga.getAwayAtack(AwayTeam);
+let awayDef = laLiga.getAwayDefense(AwayTeam);
 
 let predictedHomeGoals = homeAt * awayDef * leagueHomeStrength;
 let predictedAwayGoals = awayAt * homeDef * leagueAwayStrength;
@@ -25,7 +25,7 @@ function factorial(number){
     return sum;
 }
 
-function probabilityCalc(numberGoals, predictedNumber): number {
+function probabilityCalc(numberGoals, predictedNumber){
     return Math.pow(predictedNumber, numberGoals) * Math.pow(Math.E, -predictedNumber) / factorial(numberGoals) ;
 }
 
